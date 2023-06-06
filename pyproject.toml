@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bobby"
+description = "Orex"
+readme = "README.md"
+requires-python = ">=3.8.*"
+dependencies = []
+version = "1.0.0"
+
+[tool.setuptools.packages.find]
+where = ["src"]

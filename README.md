@@ -1,2 +1,2 @@
 # orex
-Human-friendly regex  
+Human-friendly regex
