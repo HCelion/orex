@@ -31,3 +31,16 @@ def test_starts_with():
     pattern2 = Orex().starts_with("b").compile()
     result = re.search(pattern2, s)
     assert result is None
+
+
+def test_ends_with():
+
+    s = "foo123bar"
+
+    pattern = Orex().ends_with("r").compile()
+    result = re.search(pattern, s)
+    assert result is not None
+
+    pattern2 = Orex().starts_with("o").compile()
+    result = re.search(pattern2, s)
+    assert result is None
