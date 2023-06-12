@@ -44,3 +44,17 @@ def test_ends_with():
     pattern2 = Orex().starts_with("o").compile()
     result = re.search(pattern2, s)
     assert result is None
+
+
+def test_is_match():
+    s = "foo123bar"
+    assert Orex().ends_with("r").is_match(s)
+    assert not Orex().ends_with("o").is_match(s)
+
+
+def test_find_instances():
+    s = "foo123bar345"
+    results = Orex().DIGIT.DIGIT.DIGIT.find_instances(s)
+    assert len(results) == 2
+    assert results[0] == "123"
+    assert results[1] == "345"

@@ -1,3 +1,4 @@
+import re
 from constants import RegexConstants
 
 
@@ -16,3 +17,9 @@ class Orex(RegexConstants):
     def ends_with(self, inp):
         self.expr += inp + "$"
         return self
+
+    def is_match(self, string):
+        return re.search(self.expr, string) is not None
+
+    def find_instances(self, string):
+        return re.findall(self.expr, string)
