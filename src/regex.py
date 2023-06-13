@@ -80,4 +80,22 @@ class Orex(RegexConstants):
 
         return self
 
-    # TODO: or and capture
+    def orex_or(self, string):
+
+        if isinstance(pattern, str):
+            self.expr = "(" + self.expr + "|" + pattern + ")"
+
+        else:
+            self.expr = "(" + self.expr + "|" + pattern.expr + ")"
+
+        return self
+
+    def orex_and(self, string):
+
+        if isinstance(pattern, str):
+            self.expr = "(?=.*" + self.expr + ")(?=.*" + pattern + ")"
+
+        else:
+            self.expr = "(?=.*" + self.expr + ")(?=.*" + pattern.expr + ")"
+
+        return self
