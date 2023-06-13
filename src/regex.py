@@ -9,10 +9,10 @@ class Orex(RegexConstants):
 
     def _instancer(self, pattern, starter="", ender=""):
         if isinstance(pattern, str):
-            self.expr += starter + "(" + pattern + ")" + ender
+            self.expr += starter + pattern + ender
 
         else:
-            self.expr += starter + "(" + pattern.expr + ")" + ender
+            self.expr += starter + pattern.expr + ender
 
         return self
 
@@ -42,12 +42,21 @@ class Orex(RegexConstants):
             self.expr += pattern.expr
         return self
 
+    def repeated(self, pattern, number):
+        ender = "{" + str(number) + "}"
+        self._instancer(pattern, starter="", ender=ender)
+        return self
+
     def one_or_more(self, pattern):
-        self._instancer(pattern, ender="+")
+        self._instancer(pattern, starter="(", ender=")+")
+        return self
+
+    def zero_or_one(self, pattern):
+        self._instancer(pattern, starter="[", ender="]?")
         return self
 
     def zero_or_more(self, pattern):
-        self._instancer(pattern, ender="?")
+        self._instancer(pattern, starter="[", ender="]*")
         return self
 
     def n_or_more(self, pattern, min=None, max=None):
@@ -73,7 +82,7 @@ class Orex(RegexConstants):
 
         return self
 
-    def orex_or(self, string):
+    def orex_or(self, pattern):
 
         if isinstance(pattern, str):
             self.expr = "(" + self.expr + "|" + pattern + ")"
@@ -83,12 +92,21 @@ class Orex(RegexConstants):
 
         return self
 
-    def orex_and(self, string):
+    def orex_and(self, pattern):
 
         if isinstance(pattern, str):
             self.expr = "(?=.*" + self.expr + ")(?=.*" + pattern + ")"
 
         else:
             self.expr = "(?=.*" + self.expr + ")(?=.*" + pattern.expr + ")"
+
+        return self
+
+    def orex_not(self, pattern):
+        if isinstance(pattern, str):
+            self.expr = "[^" + pattern + "]"
+
+        else:
+            self.expr = "[^" + pattern.expr + "]"
 
         return self

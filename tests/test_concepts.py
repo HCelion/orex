@@ -76,10 +76,15 @@ def test_repeat_on_patther():
 
 def test_one_or_more_str():
     s = "foo123bar"
-    assert Orex().one_or_more("oo").is_match(s)
+    pattern = Orex().one_or_more(Orex().repeated(Orex().DIGIT, 3))
 
-    s = "fo123bar"
-    assert not Orex().one_or_more("oo").is_match(s)
+    assert pattern.is_match(s)
+
+    s = "foo123456bar"
+    assert pattern.is_match(s)
+
+    s = "foo12bar"
+    assert not pattern.is_match(s)
 
 
 def test_one_or_more_pattern():
@@ -149,3 +154,14 @@ def test_literal():
     assert Orex().literal("cat").is_match(s)
 
     assert not Orex().literal("rat").is_match(s)
+
+
+def test_not_pattern():
+    s = '"string one" and "string two"'
+    pattern = (
+        Orex()
+        .literal('"')
+        .zero_or_more(Orex().orex_not(Orex().literal('"')))
+        .literal('"')
+    )
+    pattern.compile()
