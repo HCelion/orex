@@ -7,21 +7,24 @@ class Orex(RegexConstants):
         super().__init__()
         self.expr = r""
 
+    def _instancer(self, pattern, starter="", ender=""):
+        if isinstance(pattern, str):
+            self.expr += starter + "(" + pattern + ")" + ender
+
+        else:
+            self.expr += starter + "(" + pattern.expr + ")" + ender
+
+        return self
+
     def compile(self):
         return self.expr
 
     def starts_with(self, pattern):
-        if isinstance(pattern, str):
-            self.expr += "^(" + pattern + ")"
-        else:
-            self.expr += "^(" + pattern.expr + ")"
+        self._instancer(pattern, starter="^")
         return self
 
     def ends_with(self, pattern):
-        if isinstance(pattern, str):
-            self.expr += "(" + pattern + ")$"
-        else:
-            self.expr += "(" + pattern.expr + ")$"
+        self._instancer(pattern, ender="$")
         return self
 
     def is_match(self, string):
@@ -40,17 +43,11 @@ class Orex(RegexConstants):
         return self
 
     def one_or_more(self, pattern):
-        if isinstance(pattern, str):
-            self.expr += "(" + pattern + ")+"
-        else:
-            self.expr += "(" + pattern.expr + ")+"
+        self._instancer(pattern, ender="+")
         return self
 
     def zero_or_more(self, pattern):
-        if isinstance(pattern, str):
-            self.expr += "(" + pattern + ")?"
-        else:
-            self.expr += "(" + pattern.expr + ")?"
+        self._instancer(pattern, ender="?")
         return self
 
     def n_or_more(self, pattern, min=None, max=None):
@@ -67,11 +64,7 @@ class Orex(RegexConstants):
 
         quantifier += "}"
 
-        if isinstance(pattern, str):
-            self.expr += "(" + pattern + ")" + quantifier
-
-        else:
-            self.expr += "(" + pattern.expr + ")" + quantifier
+        self._instancer(pattern, ender=quantifier)
 
         return self
 
