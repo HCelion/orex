@@ -8,12 +8,8 @@ class Orex(RegexConstants):
         self.expr = r""
 
     def _instancer(self, pattern, starter="", ender=""):
-        if isinstance(pattern, str):
-            self.expr += starter + "(" + pattern + ")" + ender
-
-        else:
-            self.expr += starter + "(" + pattern.expr + ")" + ender
-
+        pattern = pattern if isinstance(pattern, str) else pattern.expr
+        self.expr += starter + "(" + pattern + ")" + ender
         return self
 
     def compile(self):
