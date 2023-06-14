@@ -56,14 +56,19 @@ class Ox(RegexConstants):
         self._instancer(pattern, starter="(", ender=ender)
         return self
 
-    def optional(self, pattern, lazy=False):
+    def optional(self, pattern, lazy=False, capturing=True):
+
+        if not capturing:
+            starter = "(?:"
+        else:
+            starter = "("
 
         if lazy:
             ender = ")??"
         else:
             ender = ")?"
 
-        self._instancer(pattern, starter="(", ender=ender)
+        self._instancer(pattern, starter=starter, ender=ender)
         return self
 
     def zero_or_more(self, pattern):
@@ -92,8 +97,12 @@ class Ox(RegexConstants):
         self.expr += string
         return self
 
-    def group(self, pattern):
-        self._instancer(pattern, starter="(", ender=")")
+    def group(self, pattern, capturing=True):
+        if not capturing:
+            starter = "(?:"
+        else:
+            starter = "("
+        self._instancer(pattern, starter=starter, ender=")")
         return self
 
     @classmethod
