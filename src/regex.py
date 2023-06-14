@@ -113,21 +113,29 @@ class Ox(RegexConstants):
 
         return pattern.expr
 
-    def orex_or(self, *patterns):
+    def _logic_builder(self, logic, *patterns):
+        pattern = [
+            (pattern if isinstance(pattern, str) else pattern.expr)
+            for pattern in patterns
+        ]
+        pattern = logic + logic.join(pattern)
 
+        return pattern
+
+    def orex_or(self, *patterns):
         joined_patterns = "|".join([self.extract_regex(pat) for pat in patterns])
 
         self.expr = self.expr + "(" + joined_patterns + ")"
-
         return self
 
-    def orex_and(self, pattern):
-
+    def orex_and(self, *patterns):
+        pattern = self._logic_builder(")(?=.*", *patterns)
         if isinstance(pattern, str):
-            self.expr = "(?=.*" + self.expr + ")(?=.*" + pattern + ")"
-
+            self.expr = "(?=.*" + self.expr + pattern + ")"
         else:
-            self.expr = "(?=.*" + self.expr + ")(?=.*" + pattern.expr + ")"
+            self.expr = (
+                "(?=.*" + self.expr + pattern.expr + ")"  # pylint: disable=(no-member)
+            )
 
         return self
 

@@ -237,3 +237,25 @@ def test_capturing_in_optional():
 
     results = Ox().literal("Set").optional("Value", capturing=False).find_instances(s)
     assert results[0] == "SetValue"
+
+
+def test_orex_and():
+    s = "foo123bar"
+    assert Ox().orex_and("foo", "bar").is_match(s)
+    assert Ox().orex_and("foo", Ox().literal("bar"))
+    assert Ox().orex_and("foo", Ox().orex_and("bar"))
+    assert Ox().orex_and("foo", "bar").orex_and("123").is_match(s)
+    assert Ox().orex_and("foo", "bar", "123").is_match(s)
+    assert Ox().orex_and("123", "bar", "foo").is_match(s)
+    assert not Ox().orex_and("foo", "baz").is_match(s)
+    assert not Ox().orex_and("qux", "bar", "foo").is_match(s)
+
+
+def test_orex_or():
+    s = "foo123bar"
+    assert Ox().orex_or("foo", Ox().literal("baz")).is_match(s)
+    assert Ox().orex_or("foo", Ox().orex_or("baz")).is_match(s)
+    assert Ox().orex_or("foo", "baz").is_match(s)
+    assert Ox().orex_or("baz", "foo").is_match(s)
+    assert Ox().orex_or("baz", "qux", "123").is_match(s)
+    assert Ox().orex_or("123", "qux", "baz").is_match(s)
