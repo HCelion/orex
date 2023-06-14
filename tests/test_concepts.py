@@ -149,3 +149,27 @@ def test_literal():
     assert Orex().literal("cat").is_match(s)
 
     assert not Orex().literal("rat").is_match(s)
+
+
+
+def test_orex_and():
+    s = "foo123bar"
+    assert Orex().orex_and("foo", "bar").is_match(s)
+    assert Orex().orex_and("foo", Orex().literal("bar"))
+    assert Orex().orex_and("foo", Orex().orex_and("bar"))
+    assert Orex().orex_and("foo", "bar").orex_and("123").is_match(s)
+    assert Orex().orex_and("foo", "bar", "123").is_match(s)
+    assert Orex().orex_and("123", "bar", "foo").is_match(s)
+    assert not Orex().orex_and("foo", "baz").is_match(s)
+    assert not Orex().orex_and("qux", "bar", "foo").is_match(s)
+
+
+def test_orex_or():
+    s = "foo123bar"
+    assert Orex().orex_or("foo", Orex().literal("baz")).is_match(s)
+    assert Orex().orex_or("foo", Orex().orex_or("baz")).is_match(s)
+    assert Orex().orex_or("foo", "baz").is_match(s)
+    assert Orex().orex_or("baz", "foo").is_match(s)
+    assert Orex().orex_or("baz", "qux").orex_or("123").is_match(s)
+    assert Orex().orex_or("baz", "qux", "123").is_match(s)
+    assert Orex().orex_or("123", "qux", "baz").is_match(s)
