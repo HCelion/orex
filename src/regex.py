@@ -73,24 +73,32 @@ class Orex(RegexConstants):
 
         return self
 
+    def _logic_builder(self, logic, *patterns):
+        pattern = [
+            (pattern if isinstance(pattern, str) else pattern.expr)
+            for pattern in patterns
+        ]
+        pattern = logic + logic.join(pattern)
+        
+        return pattern
+        
+
     def orex_or(self, *patterns):
+        pattern = self._logic_builder("|", *patterns)
+        if isinstance(pattern, str):
+            self.expr = self.expr + pattern
 
-        for pattern in patterns:
-            if isinstance(pattern, str):
-                self.expr = "(" + self.expr + "|" + pattern + ")"
-
-            else:
-                self.expr = "(" + self.expr + "|" + pattern.expr + ")"
+        else:
+            self.expr = self.expr + pattern.expr
 
         return self
 
     def orex_and(self, *patterns):
+        pattern = self._logic_builder(")(?=.*", *patterns)
+        if isinstance(pattern, str):
+            self.expr = "(?=.*" + self.expr + pattern + ")"
 
-        for pattern in patterns:
-            if isinstance(pattern, str):
-                self.expr = "(?=.*" + self.expr + ")(?=.*" + pattern + ")"
-
-            else:
-                self.expr = "(?=.*" + self.expr + ")(?=.*" + pattern.expr + ")"
+        else:
+            self.expr = "(?=.*" + self.expr + pattern.expr + ")"
 
         return self
