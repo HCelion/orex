@@ -2,13 +2,13 @@ import re
 from constants import RegexConstants
 
 
-class Orex(RegexConstants):
+class Ox(RegexConstants):
     def __init__(self):
         super().__init__()
         self.expr = r""
 
     def __repr__(self):
-        return f"Orex('{self.expr}')"
+        return f"Ox('{self.expr}')"
 
     def _instancer(self, pattern, starter="", ender=""):
         if isinstance(pattern, str):
@@ -37,12 +37,8 @@ class Orex(RegexConstants):
         return re.findall(self.expr, string)
 
     def repeat(self, pattern, n):
-        if isinstance(pattern, str):
-            self.expr += pattern * n
-            return self
-        # It better be an Orex pattern
-        for _ in range(n):
-            self.expr += pattern.expr
+        ender = "){" + str(n) + "}"
+        self._instancer(pattern, starter="(", ender=ender)
         return self
 
     def repeated(self, pattern, number):
@@ -50,8 +46,14 @@ class Orex(RegexConstants):
         self._instancer(pattern, starter="(", ender=ender)
         return self
 
-    def one_or_more(self, pattern):
-        self._instancer(pattern, starter="(", ender=")+")
+    def one_or_more(self, pattern, lazy=False):
+
+        if lazy:
+            ender = ")+?"
+        else:
+            ender = ")+"
+
+        self._instancer(pattern, starter="(", ender=ender)
         return self
 
     def optional(self, pattern, lazy=False):
