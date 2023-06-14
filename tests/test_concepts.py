@@ -67,11 +67,12 @@ def test_repeat_on_string():
     assert not Orex().repeat("1", 3).is_match(s)
 
 
-def test_repeat_on_patther():
+def test_repeat_on_pattern():
     s = "foo123bar"
     assert Orex().repeat(Orex().DIGIT, 3).is_match(s)
 
-    Orex().repeat(Orex().DIGIT, 3).compile()
+    s = "foo12bar"
+    assert not Orex().repeat(Orex().DIGIT, 3).is_match(s)
 
 
 def test_one_or_more_str():
@@ -167,6 +168,37 @@ def test_or():
 
     s = "the rat in in the house"
     assert not Orex().orex_or("cat", "dog").is_match(s)
+
+
+def test_optional():
+
+    s = "We meet in February!"
+
+    pattern = Orex().literal("Feb").optional("ruary")
+    assert pattern.is_match(s)
+
+    s = "We meet on Feb 19th!"
+    assert pattern.is_match(s)
+
+    s = "We dont meet in March!"
+    assert not pattern.is_match(s)
+
+    s = "We dont meet in a B ruary!"
+    assert not pattern.is_match(s)
+
+
+def test_optional_laziness():
+    s = "We meet in February!"
+
+    pattern = Orex().group(Orex().literal("Feb").optional("ruary"))
+    results = pattern.find_instances(s)
+    assert len(results) == 1
+    assert ("February", "ruary") in results
+
+    pattern = Orex().group(Orex().literal("Feb").optional("ruary", lazy=True))
+    results = pattern.find_instances(s)
+    assert len(results) == 1
+    assert ("Feb", "") in results
 
 
 def test_not_pattern():

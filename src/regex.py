@@ -8,7 +8,7 @@ class Orex(RegexConstants):
         self.expr = r""
 
     def __repr__(self):
-        return f"Orex({self.expr})"
+        return f"Orex('{self.expr}')"
 
     def _instancer(self, pattern, starter="", ender=""):
         if isinstance(pattern, str):
@@ -46,16 +46,22 @@ class Orex(RegexConstants):
         return self
 
     def repeated(self, pattern, number):
-        ender = "{" + str(number) + "}"
-        self._instancer(pattern, starter="", ender=ender)
+        ender = "){" + str(number) + "}"
+        self._instancer(pattern, starter="(", ender=ender)
         return self
 
     def one_or_more(self, pattern):
         self._instancer(pattern, starter="(", ender=")+")
         return self
 
-    def zero_or_one(self, pattern):
-        self._instancer(pattern, starter="(", ender=")?")
+    def optional(self, pattern, lazy=False):
+
+        if lazy:
+            ender = ")??"
+        else:
+            ender = ")?"
+
+        self._instancer(pattern, starter="(", ender=ender)
         return self
 
     def zero_or_more(self, pattern):
@@ -82,7 +88,10 @@ class Orex(RegexConstants):
 
     def literal(self, string):
         self.expr += string
+        return self
 
+    def group(self, pattern):
+        self._instancer(pattern, starter="(", ender=")")
         return self
 
     @classmethod
