@@ -156,6 +156,19 @@ def test_literal():
     assert not Orex().literal("rat").is_match(s)
 
 
+def test_or():
+    s = "the cat in in the house"
+
+    assert Orex().orex_or("cat", "dog").is_match(s)
+    assert Orex().orex_or(Orex().literal("cat"), Orex().literal("dog")).is_match(s)
+
+    s = "the dog in in the house"
+    assert Orex().orex_or("cat", "dog").is_match(s)
+
+    s = "the rat in in the house"
+    assert not Orex().orex_or("cat", "dog").is_match(s)
+
+
 def test_not_pattern():
     s = '"string one" and "string two"'
     pattern = (

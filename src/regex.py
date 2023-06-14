@@ -7,6 +7,9 @@ class Orex(RegexConstants):
         super().__init__()
         self.expr = r""
 
+    def __repr__(self):
+        return f"Orex({self.expr})"
+
     def _instancer(self, pattern, starter="", ender=""):
         if isinstance(pattern, str):
             self.expr += starter + pattern + ender
@@ -52,16 +55,16 @@ class Orex(RegexConstants):
         return self
 
     def zero_or_one(self, pattern):
-        self._instancer(pattern, starter="[", ender="]?")
+        self._instancer(pattern, starter="(", ender=")?")
         return self
 
     def zero_or_more(self, pattern):
-        self._instancer(pattern, starter="[", ender="]*")
+        self._instancer(pattern, starter="(", ender=")*")
         return self
 
     def n_or_more(self, pattern, min=None, max=None):
         # pylint: disable=(redefined-builtin)
-        quantifier = r"{"
+        quantifier = r"){"
 
         if min:
             quantifier += str(min)
@@ -73,7 +76,7 @@ class Orex(RegexConstants):
 
         quantifier += "}"
 
-        self._instancer(pattern, ender=quantifier)
+        self._instancer(pattern, starter="(", ender=quantifier)
 
         return self
 
@@ -82,13 +85,19 @@ class Orex(RegexConstants):
 
         return self
 
-    def orex_or(self, pattern):
+    @classmethod
+    def extract_regex(cls, pattern):
 
         if isinstance(pattern, str):
-            self.expr = "(" + self.expr + "|" + pattern + ")"
+            return pattern
 
-        else:
-            self.expr = "(" + self.expr + "|" + pattern.expr + ")"
+        return pattern.expr
+
+    def orex_or(self, *patterns):
+
+        joined_patterns = "|".join([self.extract_regex(pat) for pat in patterns])
+
+        self.expr = self.expr + "(" + joined_patterns + ")"
 
         return self
 
