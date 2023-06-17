@@ -21,6 +21,7 @@ constants = {
     "HEXDIGIT": r"[A-Fa-f0-9]",
     "ALNUM": r"[a-zA-Z0-9]",
     "WORD": r"\b(\w+)\b",
+    "QUOTAtION": '"',
 }
 
 

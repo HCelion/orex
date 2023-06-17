@@ -100,15 +100,15 @@ def test_one_or_more_laziness():
     s = "<EM>first</EM>"
     pattern = Ox().group(Ox().literal("<").one_or_more(Ox().ANY_CHAR).literal(">"))
     results = pattern.find_instances(s)
-    assert results[0] == ("<EM>first</EM>", "M")
+    assert results[0] == "<EM>first</EM>"
 
     pattern = Ox().group(
         Ox().literal("<").one_or_more(Ox().ANY_CHAR, lazy=True).literal(">")
     )
     results = pattern.find_instances(s)
     assert len(results) == 2
-    assert results[0] == ("<EM>", "M")
-    assert results[1] == ("</EM>", "M")
+    assert results[0] == "<EM>"
+    assert results[1] == "</EM>"
 
 
 def test_blank():
@@ -210,33 +210,45 @@ def test_optional():
 def test_optional_laziness():
     s = "We meet in February!"
 
-    pattern = Ox().group(Ox().literal("Feb").optional("ruary"))
+    pattern = Ox().group(
+        Ox().literal("Feb").optional("ruary", capturing=True), capturing=True
+    )
     results = pattern.find_instances(s)
     assert len(results) == 1
     assert ("February", "ruary") in results
 
-    pattern = Ox().group(Ox().literal("Feb").optional("ruary", lazy=True))
+    pattern = Ox().group(
+        Ox().literal("Feb").optional("ruary", lazy=True, capturing=True), capturing=True
+    )
     results = pattern.find_instances(s)
     assert len(results) == 1
     assert ("Feb", "") in results
 
 
-@pytest.mark.skip("Needs work, currently not correct behaviour")
 def test_not_pattern():
     s = '"string one" and "string two"'
     pattern = (
-        Ox().literal('"').zero_or_more(Ox().orex_not(Ox().literal('"'))).literal('"')
+        Ox()
+        .literal('"')
+        .zero_or_more(Ox().not_literal(Ox().RETURN.QUOTAtION.NEWLINE), capturing=False)
+        .literal('"')
     )
-    pattern.find_instances(s)
+    results = pattern.find_instances(s)
+    assert len(results) == 2
+    assert results[0] == '"string one"'
+    assert results[1] == '"string two"'
 
 
 def test_capturing_in_optional():
     s = "SetValue"
     results = Ox().literal("Set").optional("Value").find_instances(s)
-    assert results[0] == "Value"
+    assert results[0] == "SetValue"
 
     results = Ox().literal("Set").optional("Value", capturing=False).find_instances(s)
     assert results[0] == "SetValue"
+
+    results = Ox().literal("Set").optional("Value", capturing=True).find_instances(s)
+    assert results[0] == "Value"
 
 
 def test_orex_and():
