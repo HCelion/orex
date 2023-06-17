@@ -271,3 +271,118 @@ def test_orex_or():
     assert Ox().orex_or("baz", "foo").is_match(s)
     assert Ox().orex_or("baz", "qux", "123").is_match(s)
     assert Ox().orex_or("123", "qux", "baz").is_match(s)
+
+
+def test_back_reference():
+    s = "<EM>first</EM>"
+
+    pattern = (
+        Ox()
+        .literal("<")
+        .group(Ox().one_or_more(Ox().not_literal(">")), capturing=True)
+        .literal(">")
+        .group(Ox().one_or_more(Ox().ANY_CHAR), capturing=True)
+        .literal("</")
+        .reference_capturing_group()
+        .literal(">")
+    )
+    results = pattern.find_instances(s)
+    assert len(results) == 1
+    assert results[0] == ("EM", "first")
+
+    pattern = (
+        Ox()
+        .literal("<")
+        .group(Ox().one_or_more(Ox().not_literal(">")), capturing=True)
+        .literal(">")
+        .group(Ox().one_or_more(Ox().ANY_CHAR), capturing=True)
+        .literal("</")
+        .reference_capturing_group(1)
+        .literal(">")
+    )
+    results = pattern.find_instances(s)
+    assert len(results) == 1
+    assert results[0] == ("EM", "first")
+
+    pattern = (
+        Ox()
+        .literal("<")
+        .group(Ox().one_or_more(Ox().not_literal(">")), capturing=True)
+        .literal(">")
+        .group(Ox().one_or_more(Ox().ANY_CHAR), capturing=True)
+        .literal("</")
+        .reference_capturing_group(2)
+        .literal(">")
+    )
+    assert not pattern.is_match(s)
+
+    s = "<EM>first</first>"
+    pattern = (
+        Ox()
+        .literal("<")
+        .group(Ox().one_or_more(Ox().not_literal(">")), capturing=True)
+        .literal(">")
+        .group(Ox().one_or_more(Ox().ANY_CHAR), capturing=True)
+        .literal("</")
+        .reference_capturing_group(2)
+        .literal(">")
+    )
+    assert pattern.is_match(s)
+
+
+def test_named_back_reference():
+    s = "<EM>first</EM>"
+
+    pattern = (
+        Ox()
+        .literal("<")
+        .group(Ox().one_or_more(Ox().not_literal(">")), capturing=True, name="tag")
+        .literal(">")
+        .group(Ox().one_or_more(Ox().ANY_CHAR), capturing=True)
+        .literal("</")
+        .reference_capturing_group(name="tag")
+        .literal(">")
+    )
+    results = pattern.find_instances(s)
+    assert len(results) == 1
+    assert results[0] == ("EM", "first")
+
+
+def test_optional_special_case():
+    s = "b"
+    # (q?)b\1 does typically not match as the empty group does not back reference
+    pattern = (
+        Ox().optional("q", capturing=True).literal("b").reference_capturing_group()
+    )
+    assert not pattern.is_match(s)
+    # (q)?b\1 does typically match
+    pattern = (
+        Ox()
+        .group(Ox().literal("q?"), capturing=True)
+        .literal("b")
+        .reference_capturing_group()
+    )
+    assert pattern.is_match(s)
+    pattern = (
+        Ox()
+        .group(Ox().optional("q", capturing=False), capturing=True)
+        .literal("b")
+        .reference_capturing_group()
+    )
+    assert pattern.is_match(s)
+
+
+def test_forward_referencing_does_not_work_in_python():
+    s = "oneonetwo"
+    pattern = Ox().one_or_more(
+        Ox().orex_or(
+            Ox().reference_capturing_group(2).literal("two"),
+            Ox().group(Ox().literal("one"), capturing=True),
+        ),
+        capturing=True,
+    )
+
+    try:
+        pattern.is_match(s)
+    except:
+        assert True

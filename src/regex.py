@@ -42,12 +42,15 @@ class Ox(RegexConstants):
         return self
 
     @staticmethod
-    def get_group_boundaries(group_identifier, lazy, capturing):
+    def get_group_boundaries(group_identifier, lazy, capturing, name=None):
 
         if not capturing:
             starter = "(?:"
         else:
-            starter = "("
+            if name:
+                starter = f"(?P<{name}>"
+            else:
+                starter = "("
 
         if lazy:
             ender = f"){group_identifier}?"
@@ -61,24 +64,30 @@ class Ox(RegexConstants):
         self._instancer(pattern, starter="(", ender=ender)
         return self
 
-    def one_or_more(self, pattern, lazy=False, capturing=False):
+    def one_or_more(self, pattern, lazy=False, capturing=False, name=None):
 
-        starter, ender = self.get_group_boundaries("+", lazy=lazy, capturing=capturing)
+        starter, ender = self.get_group_boundaries(
+            "+", lazy=lazy, capturing=capturing, name=name
+        )
 
         self._instancer(pattern, starter=starter, ender=ender)
         return self
 
-    def optional(self, pattern, lazy=False, capturing=False):
+    def optional(self, pattern, lazy=False, capturing=False, name=None):
 
-        starter, ender = self.get_group_boundaries("?", lazy=lazy, capturing=capturing)
+        starter, ender = self.get_group_boundaries(
+            "?", lazy=lazy, capturing=capturing, name=name
+        )
         self._instancer(pattern, starter=starter, ender=ender)
         return self
 
-    def zero_or_one(self, pattern, lazy=False, capturing=False):
-        return self.optional(pattern=pattern, lazy=lazy, capturing=capturing)
+    def zero_or_one(self, pattern, lazy=False, capturing=False, name=None):
+        return self.optional(pattern=pattern, lazy=lazy, capturing=capturing, name=name)
 
-    def zero_or_more(self, pattern, lazy=False, capturing=False):
-        starter, ender = self.get_group_boundaries("*", lazy=lazy, capturing=capturing)
+    def zero_or_more(self, pattern, lazy=False, capturing=False, name=None):
+        starter, ender = self.get_group_boundaries(
+            "*", lazy=lazy, capturing=capturing, name=name
+        )
         self._instancer(pattern, starter=starter, ender=ender)
         return self
 
@@ -104,12 +113,11 @@ class Ox(RegexConstants):
         self.expr += string
         return self
 
-    def group(self, pattern, capturing=False):
-        if not capturing:
-            starter = "(?:"
-        else:
-            starter = "("
-        self._instancer(pattern, starter=starter, ender=")")
+    def group(self, pattern, capturing=False, lazy=False, name=None):
+        starter, ender = self.get_group_boundaries(
+            "", lazy=lazy, capturing=capturing, name=name
+        )
+        self._instancer(pattern, starter=starter, ender=ender)
         return self
 
     @classmethod
@@ -152,5 +160,11 @@ class Ox(RegexConstants):
 
         else:
             self.expr = "[^" + pattern.expr + "]"
+        return self
 
+    def reference_capturing_group(self, n=1, name=None):
+        if name:
+            self.expr += f"(?P={name})"
+            return self
+        self.expr += rf"\{n}"
         return self
