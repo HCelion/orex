@@ -19,8 +19,26 @@ class Ox(RegexConstants):
 
         return self
 
-    def compile(self):
-        return self.expr
+    def compile(
+        self,
+        use_ascii=False,
+        dotall=False,
+        ignorecase=False,
+        locale=False,
+        multiline=False,
+    ):
+        modifiers = []
+        if use_ascii:
+            modifiers.append(re.ASCII)
+        if dotall:
+            modifiers.append(re.DOTALL)
+        if ignorecase:
+            modifiers.append(re.IGNORECASE)
+        if locale:
+            modifiers.append(re.LOCALE)
+        if multiline:
+            modifiers.append(re.MULTILINE)
+        return re.compile(self.expr, *modifiers)
 
     def starts_with(self, pattern):
         self._instancer(pattern, starter="^")
@@ -33,8 +51,14 @@ class Ox(RegexConstants):
     def is_match(self, string):
         return re.search(self.expr, string) is not None
 
-    def find_instances(self, string):
+    def findall(self, string):
         return re.findall(self.expr, string)
+
+    def finditer(self, string):
+        return re.finditer(self.expr, string)
+
+    def sub(self, string, replacement):
+        return re.sub(pattern=self.expr, repl=replacement, string=string)
 
     def repeat(self, pattern, n):
         ender = "){" + str(n) + "}"
@@ -154,7 +178,7 @@ class Ox(RegexConstants):
 
         return self
 
-    def not_literal(self, pattern):
+    def contains_not(self, pattern):
         if isinstance(pattern, str):
             self.expr = "[^" + pattern + "]"
 
@@ -167,4 +191,12 @@ class Ox(RegexConstants):
             self.expr += f"(?P={name})"
             return self
         self.expr += rf"\{n}"
+        return self
+
+    def character_class(self, pattern):
+        if isinstance(pattern, str):
+            self.expr = "[" + pattern + "]"
+
+        else:
+            self.expr = "[" + pattern.expr + "]"
         return self

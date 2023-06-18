@@ -52,9 +52,9 @@ def test_is_match():
     assert not Ox().ends_with("o").is_match(s)
 
 
-def test_find_instances():
+def test_findall():
     s = "foo123bar345"
-    results = Ox().DIGIT.DIGIT.DIGIT.find_instances(s)
+    results = Ox().DIGIT.DIGIT.DIGIT.findall(s)
     assert len(results) == 2
     assert results[0] == "123"
     assert results[1] == "345"
@@ -99,13 +99,13 @@ def test_one_or_more_pattern():
 def test_one_or_more_laziness():
     s = "<EM>first</EM>"
     pattern = Ox().group(Ox().literal("<").one_or_more(Ox().ANY_CHAR).literal(">"))
-    results = pattern.find_instances(s)
+    results = pattern.findall(s)
     assert results[0] == "<EM>first</EM>"
 
     pattern = Ox().group(
         Ox().literal("<").one_or_more(Ox().ANY_CHAR, lazy=True).literal(">")
     )
-    results = pattern.find_instances(s)
+    results = pattern.findall(s)
     assert len(results) == 2
     assert results[0] == "<EM>"
     assert results[1] == "</EM>"
@@ -154,12 +154,12 @@ def test_word():
     s = " word "
     assert Ox().WORD.is_match(s)
 
-    results = Ox().WORD.find_instances(s)
+    results = Ox().WORD.findall(s)
     assert len(results) == 1
     assert results[0] == "word"
 
     s = " word test"
-    results = Ox().WORD.find_instances(s)
+    results = Ox().WORD.findall(s)
     assert len(results) == 2
     assert results[0] == "word"
     assert results[1] == "test"
@@ -213,14 +213,14 @@ def test_optional_laziness():
     pattern = Ox().group(
         Ox().literal("Feb").optional("ruary", capturing=True), capturing=True
     )
-    results = pattern.find_instances(s)
+    results = pattern.findall(s)
     assert len(results) == 1
     assert ("February", "ruary") in results
 
     pattern = Ox().group(
         Ox().literal("Feb").optional("ruary", lazy=True, capturing=True), capturing=True
     )
-    results = pattern.find_instances(s)
+    results = pattern.findall(s)
     assert len(results) == 1
     assert ("Feb", "") in results
 
@@ -230,10 +230,10 @@ def test_not_pattern():
     pattern = (
         Ox()
         .literal('"')
-        .zero_or_more(Ox().not_literal(Ox().RETURN.QUOTAtION.NEWLINE), capturing=False)
+        .zero_or_more(Ox().contains_not(Ox().RETURN.QUOTAtION.NEWLINE), capturing=False)
         .literal('"')
     )
-    results = pattern.find_instances(s)
+    results = pattern.findall(s)
     assert len(results) == 2
     assert results[0] == '"string one"'
     assert results[1] == '"string two"'
@@ -241,13 +241,13 @@ def test_not_pattern():
 
 def test_capturing_in_optional():
     s = "SetValue"
-    results = Ox().literal("Set").optional("Value").find_instances(s)
+    results = Ox().literal("Set").optional("Value").findall(s)
     assert results[0] == "SetValue"
 
-    results = Ox().literal("Set").optional("Value", capturing=False).find_instances(s)
+    results = Ox().literal("Set").optional("Value", capturing=False).findall(s)
     assert results[0] == "SetValue"
 
-    results = Ox().literal("Set").optional("Value", capturing=True).find_instances(s)
+    results = Ox().literal("Set").optional("Value", capturing=True).findall(s)
     assert results[0] == "Value"
 
 
@@ -279,35 +279,35 @@ def test_back_reference():
     pattern = (
         Ox()
         .literal("<")
-        .group(Ox().one_or_more(Ox().not_literal(">")), capturing=True)
+        .group(Ox().one_or_more(Ox().contains_not(">")), capturing=True)
         .literal(">")
         .group(Ox().one_or_more(Ox().ANY_CHAR), capturing=True)
         .literal("</")
         .reference_capturing_group()
         .literal(">")
     )
-    results = pattern.find_instances(s)
+    results = pattern.findall(s)
     assert len(results) == 1
     assert results[0] == ("EM", "first")
 
     pattern = (
         Ox()
         .literal("<")
-        .group(Ox().one_or_more(Ox().not_literal(">")), capturing=True)
+        .group(Ox().one_or_more(Ox().contains_not(">")), capturing=True)
         .literal(">")
         .group(Ox().one_or_more(Ox().ANY_CHAR), capturing=True)
         .literal("</")
         .reference_capturing_group(1)
         .literal(">")
     )
-    results = pattern.find_instances(s)
+    results = pattern.findall(s)
     assert len(results) == 1
     assert results[0] == ("EM", "first")
 
     pattern = (
         Ox()
         .literal("<")
-        .group(Ox().one_or_more(Ox().not_literal(">")), capturing=True)
+        .group(Ox().one_or_more(Ox().contains_not(">")), capturing=True)
         .literal(">")
         .group(Ox().one_or_more(Ox().ANY_CHAR), capturing=True)
         .literal("</")
@@ -320,7 +320,7 @@ def test_back_reference():
     pattern = (
         Ox()
         .literal("<")
-        .group(Ox().one_or_more(Ox().not_literal(">")), capturing=True)
+        .group(Ox().one_or_more(Ox().contains_not(">")), capturing=True)
         .literal(">")
         .group(Ox().one_or_more(Ox().ANY_CHAR), capturing=True)
         .literal("</")
@@ -336,14 +336,14 @@ def test_named_back_reference():
     pattern = (
         Ox()
         .literal("<")
-        .group(Ox().one_or_more(Ox().not_literal(">")), capturing=True, name="tag")
+        .group(Ox().one_or_more(Ox().contains_not(">")), capturing=True, name="tag")
         .literal(">")
         .group(Ox().one_or_more(Ox().ANY_CHAR), capturing=True)
         .literal("</")
         .reference_capturing_group(name="tag")
         .literal(">")
     )
-    results = pattern.find_instances(s)
+    results = pattern.findall(s)
     assert len(results) == 1
     assert results[0] == ("EM", "first")
 
@@ -386,3 +386,63 @@ def test_forward_referencing_does_not_work_in_python():
         pattern.is_match(s)
     except:
         assert True
+
+
+def test_character_class():
+
+    s = "This costs 12$"
+
+    pattern = Ox().repeat(Ox().DIGIT, 2).literal("$")
+    # the $ is interpreted as meaning end of string
+    assert not pattern.is_match(s)
+
+    pattern = Ox().repeat(Ox().DIGIT, 2).character_class("$")
+    assert pattern.is_match(s)
+
+
+def test_backslash():
+    s = r"this is a \string in latex"
+    pattern = Ox().BACKSLASH.literal("string")
+    assert pattern.is_match(s)
+
+
+def test_match_new_line():
+    s = """This has a
+    new line"""
+
+    assert Ox().NEWLINE.is_match(s)
+
+
+def test_find_iter():
+    s = "12 drummers drumming, 11 pipers piping, 10 lords a-leaping"
+    iterator = Ox().DIGIT.DIGIT.finditer(s)
+
+    counter = 0
+    for match in iterator:
+        assert int(match.group()) > 9
+        counter += 1
+    assert counter == 3
+
+
+def test_replacement():
+    s = "12 drummers drumming, 11 pipers piping, 10 lords a-leaping"
+    pattern = Ox().DIGIT.DIGIT
+
+    result = pattern.sub(s, "aa")
+    assert result == "aa drummers drumming, aa pipers piping, aa lords a-leaping"
+    # The original string is not altered
+    assert s == "12 drummers drumming, 11 pipers piping, 10 lords a-leaping"
+
+
+def test_compilation():
+    import re
+
+    s = " test "
+    s_alt = " TEST "
+    pattern = Ox().literal("test").compile()
+    assert re.search(pattern, s)
+    assert not re.search(pattern, s_alt)
+
+    pattern = Ox().literal("test").compile(ignorecase=True)
+    assert re.search(pattern, s)
+    assert re.search(pattern, s_alt)
