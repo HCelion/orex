@@ -65,6 +65,14 @@ class Ox(RegexConstants):
 
         return None
 
+    def group_dict(self, string):
+        match = re.search(self.expr, string)
+
+        if match:
+            return match.groupdict()
+
+        return None
+
     def sub(self, string, replacement):
         return re.sub(pattern=self.expr, repl=replacement, string=string)
 

@@ -466,3 +466,23 @@ def test_named_groups():
     assert "EM" == pattern.get_group(s, 1)
     assert "first" == pattern.get_group(s, 2)
     assert "EM" == pattern.get_group(s, "tag")
+
+
+def test_groupdict():
+    s = "<EM>first</EM>"
+
+    pattern = (
+        Ox()
+        .literal("<")
+        .group(Ox().one_or_more(Ox().contains_not(">")), capturing=True, name="tag")
+        .literal(">")
+        .group(Ox().one_or_more(Ox().ANY_CHAR), capturing=True, name="content")
+        .literal("</")
+        .reference_capturing_group(name="tag")
+        .literal(">")
+    )
+
+    result = pattern.group_dict(s)
+    assert len(result) == 2
+    assert result["tag"] == "EM"
+    assert result["content"] == "first"
