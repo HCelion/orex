@@ -446,3 +446,23 @@ def test_compilation():
     pattern = Ox().literal("test").compile(ignorecase=True)
     assert re.search(pattern, s)
     assert re.search(pattern, s_alt)
+
+
+def test_named_groups():
+    s = "<EM>first</EM>"
+
+    pattern = (
+        Ox()
+        .literal("<")
+        .group(Ox().one_or_more(Ox().contains_not(">")), capturing=True, name="tag")
+        .literal(">")
+        .group(Ox().one_or_more(Ox().ANY_CHAR), capturing=True)
+        .literal("</")
+        .reference_capturing_group(name="tag")
+        .literal(">")
+    )
+
+    assert s == pattern.get_group(s, 0)
+    assert "EM" == pattern.get_group(s, 1)
+    assert "first" == pattern.get_group(s, 2)
+    assert "EM" == pattern.get_group(s, "tag")

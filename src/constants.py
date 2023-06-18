@@ -26,6 +26,7 @@ constants = {
     "QUOTAtION": '"',
     "WHITESPACE": r"\s",
     "NON_WHITESPACE": r"\S",
+    "BAR": r"\|",
 }
 
 

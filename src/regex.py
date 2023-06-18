@@ -57,6 +57,14 @@ class Ox(RegexConstants):
     def finditer(self, string):
         return re.finditer(self.expr, string)
 
+    def get_group(self, string, name):
+        match = re.search(self.expr, string)
+
+        if match:
+            return match.group(name)
+
+        return None
+
     def sub(self, string, replacement):
         return re.sub(pattern=self.expr, repl=replacement, string=string)
 
