@@ -486,3 +486,33 @@ def test_groupdict():
     assert len(result) == 2
     assert result["tag"] == "EM"
     assert result["content"] == "first"
+
+
+def test_positive_lookahead_assertion():
+    s = "something.bat"
+    pattern = (
+        Ox()
+        .zero_or_more(Ox().ANY_CHAR.DOT)
+        .positive_lookahead_assertion(Ox().literal("bat").END)
+        .zero_or_more(Ox().contains_not(Ox().DOT))
+        .END
+    )
+    assert pattern.is_match(s)
+
+    s = "something.exe"
+    assert not pattern.is_match(s)
+
+
+def test_negative_lookahead_assertion():
+    s = "something.bat"
+    pattern = (
+        Ox()
+        .one_or_more(Ox().ANY_CHAR)
+        .DOT.negative_lookahead_assertion(Ox().literal("bat").END)
+        .one_or_more(Ox().ANY_CHAR)
+        .END
+    )
+    assert not pattern.is_match(s)
+
+    s = "something.exe"
+    assert pattern.is_match(s)

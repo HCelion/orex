@@ -196,10 +196,10 @@ class Ox(RegexConstants):
 
     def contains_not(self, pattern):
         if isinstance(pattern, str):
-            self.expr = "[^" + pattern + "]"
+            self.expr += "[^" + pattern + "]"
 
         else:
-            self.expr = "[^" + pattern.expr + "]"
+            self.expr += "[^" + pattern.expr + "]"
         return self
 
     def reference_capturing_group(self, n=1, name=None):
@@ -211,8 +211,24 @@ class Ox(RegexConstants):
 
     def character_class(self, pattern):
         if isinstance(pattern, str):
-            self.expr = "[" + pattern + "]"
+            self.expr += "[" + pattern + "]"
 
         else:
-            self.expr = "[" + pattern.expr + "]"
+            self.expr += "[" + pattern.expr + "]"
+        return self
+
+    def positive_lookahead_assertion(self, pattern):
+        if isinstance(pattern, str):
+            self.expr += "(?=" + pattern + ")"
+
+        else:
+            self.expr += "(?=" + pattern.expr + ")"
+        return self
+
+    def negative_lookahead_assertion(self, pattern):
+        if isinstance(pattern, str):
+            self.expr += "(?!" + pattern + ")"
+
+        else:
+            self.expr += "(?!" + pattern.expr + ")"
         return self
