@@ -13,18 +13,21 @@ class Ox(RegexConstants):
     def __repr__(self):
         return f"Ox('{self.expr}')"
 
+    @classmethod
+    def extract_regex(self, pattern):
+
+        if isinstance(pattern, str):
+            return pattern
+
+        return pattern.expr
+
     def __add__(self, other):
-        if isinstance(other, str):
-            return Ox(expr=self.expr + other)
-        return Ox(expr=self.expr + other.expr)
+        other = self.extract_regex(other)
+        return Ox(expr=self.expr + other)
 
     def _instancer(self, pattern, starter="", ender=""):
-        if isinstance(pattern, str):
-            self.expr += starter + pattern + ender
-
-        else:
-            self.expr += starter + pattern.expr + ender
-
+        pattern = self.extract_regex(pattern)
+        self.expr += starter + pattern + ender
         return self
 
     def compile(
@@ -168,14 +171,6 @@ class Ox(RegexConstants):
         self._instancer(pattern, starter=starter, ender=ender)
         return self
 
-    @classmethod
-    def extract_regex(cls, pattern):
-
-        if isinstance(pattern, str):
-            return pattern
-
-        return pattern.expr
-
     def _logic_builder(self, logic, *patterns):
         pattern = [
             (pattern if isinstance(pattern, str) else pattern.expr)
@@ -187,27 +182,16 @@ class Ox(RegexConstants):
 
     def orex_or(self, *patterns):
         joined_patterns = "|".join([self.extract_regex(pat) for pat in patterns])
-
         self.expr = self.expr + "(" + joined_patterns + ")"
         return self
 
     def orex_and(self, *patterns):
         pattern = self._logic_builder(")(?=.*", *patterns)
-        if isinstance(pattern, str):
-            self.expr = "(?=.*" + self.expr + pattern + ")"
-        else:
-            self.expr = (
-                "(?=.*" + self.expr + pattern.expr + ")"  # pylint: disable=(no-member)
-            )
-
+        self._instancer(pattern, starter="(?=.*", ender=")")
         return self
 
     def contains_not(self, pattern):
-        if isinstance(pattern, str):
-            self.expr += "[^" + pattern + "]"
-
-        else:
-            self.expr += "[^" + pattern.expr + "]"
+        self._instancer(pattern, starter="[^", ender="]")
         return self
 
     def reference_capturing_group(self, n=1, name=None):
@@ -218,27 +202,15 @@ class Ox(RegexConstants):
         return self
 
     def character_class(self, pattern):
-        if isinstance(pattern, str):
-            self.expr += "[" + pattern + "]"
-
-        else:
-            self.expr += "[" + pattern.expr + "]"
+        self._instancer(pattern, starter="[", ender="]")
         return self
 
     def positive_lookahead_assertion(self, pattern):
-        if isinstance(pattern, str):
-            self.expr += "(?=" + pattern + ")"
-
-        else:
-            self.expr += "(?=" + pattern.expr + ")"
+        self._instancer(pattern, starter="(?=", ender=")")
         return self
 
     def negative_lookahead_assertion(self, pattern):
-        if isinstance(pattern, str):
-            self.expr += "(?!" + pattern + ")"
-
-        else:
-            self.expr += "(?!" + pattern.expr + ")"
+        self._instancer(pattern, starter="(?!", ender=")")
         return self
 
 
