@@ -260,6 +260,44 @@ def repeat(regex, n):
     return instancer(regex, starter="(", ender=ender)
 
 
+def extract_regex(cls, pattern):
+
+    if isinstance(pattern, str):
+        return pattern
+
+    return pattern.expr
+
+
+def n_or_more(regex, min=None, max=None):
+    quantifier = r"){"
+
+    if min:
+        quantifier += str(min)
+
+    quantifier += ","
+
+    if max:
+        quantifier += str(max)
+
+    quantifier += "}"
+
+    return instancer(regex, starter="(", ender=quantifier)
+
+
+def logic_builder(logic, *patterns):
+    pattern = [
+        (pattern if isinstance(pattern, str) else pattern.expr)
+        for pattern in patterns
+    ]
+    pattern = logic + logic.join(pattern)
+
+
+def orex_or(*patterns):
+    joined_patterns = "|".join([extract_regex(pat) for pat in patterns])
+    expr + "(" + joined_patterns + ")"
+    return self
+    
+
 for key, value in constants.items():
     if key != "QUOTATION":
         exec(f'{key} = Ox(expr="{value}")')  # pylint: disable=(exec-used)
