@@ -179,7 +179,6 @@ class Ox(RegexConstants):
 
     def orex_or(self, *patterns):
         joined_patterns = "|".join([self.extract_regex(pat) for pat in patterns])
-
         self.expr = self.expr + "(" + joined_patterns + ")"
         return self
 
