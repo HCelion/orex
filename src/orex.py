@@ -1,8 +1,8 @@
 import re
-from constants import RegexConstants, constants
+from constants import constants
 
 
-class Ox(RegexConstants):
+class Ox:
     def __init__(self, expr=None):
         super().__init__()
         if not expr:
@@ -13,22 +13,9 @@ class Ox(RegexConstants):
     def __repr__(self):
         return f"Ox('{self.expr}')"
 
-    @classmethod
-    def extract_regex(self, pattern):
-
-        if isinstance(pattern, str):
-            return pattern
-
-        return pattern.expr
-
     def __add__(self, other):
-        other = self.extract_regex(other)
+        other = extract_regex(other)
         return Ox(expr=self.expr + other)
-
-    def _instancer(self, pattern, starter="", ender=""):
-        pattern = self.extract_regex(pattern)
-        self.expr += starter + pattern + ender
-        return self
 
     def compile(
         self,
@@ -50,14 +37,6 @@ class Ox(RegexConstants):
         if multiline:
             modifiers.append(re.MULTILINE)
         return re.compile(self.expr, *modifiers)
-
-    def starts_with(self, pattern):
-        self._instancer(pattern, starter="^")
-        return self
-
-    def ends_with(self, pattern):
-        self._instancer(pattern, ender="$")
-        return self
 
     def is_match(self, string):
         return re.search(self.expr, string) is not None
@@ -87,132 +66,6 @@ class Ox(RegexConstants):
     def sub(self, string, replacement):
         return re.sub(pattern=self.expr, repl=replacement, string=string)
 
-    def repeat(self, pattern, n):
-        ender = "){" + str(n) + "}"
-        self._instancer(pattern, starter="(", ender=ender)
-        return self
-
-    @staticmethod
-    def get_group_boundaries(group_identifier, lazy, capturing, name=None):
-
-        if not capturing:
-            starter = "(?:"
-        else:
-            if name:
-                starter = f"(?P<{name}>"
-            else:
-                starter = "("
-
-        if lazy:
-            ender = f"){group_identifier}?"
-        else:
-            ender = f"){group_identifier}"
-
-        return starter, ender
-
-    def repeated(self, pattern, number):
-        ender = "){" + str(number) + "}"
-        self._instancer(pattern, starter="(", ender=ender)
-        return self
-
-    def one_or_more(self, pattern, lazy=False, capturing=False, name=None):
-
-        starter, ender = self.get_group_boundaries(
-            "+", lazy=lazy, capturing=capturing, name=name
-        )
-
-        self._instancer(pattern, starter=starter, ender=ender)
-        return self
-
-    def optional(self, pattern, lazy=False, capturing=False, name=None):
-
-        starter, ender = self.get_group_boundaries(
-            "?", lazy=lazy, capturing=capturing, name=name
-        )
-        self._instancer(pattern, starter=starter, ender=ender)
-        return self
-
-    def zero_or_one(self, pattern, lazy=False, capturing=False, name=None):
-        return self.optional(pattern=pattern, lazy=lazy, capturing=capturing, name=name)
-
-    def zero_or_more(self, pattern, lazy=False, capturing=False, name=None):
-        starter, ender = self.get_group_boundaries(
-            "*", lazy=lazy, capturing=capturing, name=name
-        )
-        self._instancer(pattern, starter=starter, ender=ender)
-        return self
-
-    def n_or_more(self, pattern, min=None, max=None):
-        # pylint: disable=(redefined-builtin)
-        quantifier = r"){"
-
-        if min:
-            quantifier += str(min)
-
-        quantifier += ","
-
-        if max:
-            quantifier += str(max)
-
-        quantifier += "}"
-
-        self._instancer(pattern, starter="(", ender=quantifier)
-
-        return self
-
-    def literal(self, string):
-        self.expr += string
-        return self
-
-    def group(self, pattern, capturing=False, lazy=False, name=None):
-        starter, ender = self.get_group_boundaries(
-            "", lazy=lazy, capturing=capturing, name=name
-        )
-        self._instancer(pattern, starter=starter, ender=ender)
-        return self
-
-    def _logic_builder(self, logic, *patterns):
-        pattern = [
-            (pattern if isinstance(pattern, str) else pattern.expr)
-            for pattern in patterns
-        ]
-        pattern = logic + logic.join(pattern)
-
-        return pattern
-
-    def orex_or(self, *patterns):
-        joined_patterns = "|".join([self.extract_regex(pat) for pat in patterns])
-        self.expr = self.expr + "(" + joined_patterns + ")"
-        return self
-
-    def orex_and(self, *patterns):
-        pattern = self._logic_builder(")(?=.*", *patterns)
-        self._instancer(pattern, starter="(?=.*", ender=")")
-        return self
-
-    def contains_not(self, pattern):
-        self._instancer(pattern, starter="[^", ender="]")
-        return self
-
-    def reference_capturing_group(self, n=1, name=None):
-        if name:
-            self.expr += f"(?P={name})"
-            return self
-        self.expr += rf"\{n}"
-        return self
-
-    def character_class(self, pattern):
-        self._instancer(pattern, starter="[", ender="]")
-        return self
-
-    def positive_lookahead_assertion(self, pattern):
-        self._instancer(pattern, starter="(?=", ender=")")
-        return self
-
-    def negative_lookahead_assertion(self, pattern):
-        self._instancer(pattern, starter="(?!", ender=")")
-        return self
-
 
 def literal(expr_str):
     return Ox(expr=expr_str)
@@ -227,13 +80,132 @@ def instancer(pattern, starter="", ender=""):
     return Ox(expr=expr)
 
 
+def extract_regex(pattern):
+
+    if isinstance(pattern, str):
+        return pattern
+
+    return pattern.expr
+
+
+def logic_builder(logic, *patterns):
+    pattern = [
+        (pattern if isinstance(pattern, str) else pattern.expr) for pattern in patterns
+    ]
+    pattern = logic + logic.join(pattern)
+
+    return pattern
+
+
+def get_group_boundaries(group_identifier, lazy, capturing, name=None):
+    if not capturing:
+        starter = "(?:"
+    else:
+        if name:
+            starter = f"(?P<{name}>"
+        else:
+            starter = "("
+
+    if lazy:
+        ender = f"){group_identifier}?"
+    else:
+        ender = f"){group_identifier}"
+
+    return starter, ender
+
+
 def repeat(regex, n):
-    ender = "){" + str(n) + "}"
+    ender = "){" + str(n) + "," + str(n) + "}"
     return instancer(regex, starter="(", ender=ender)
+
+
+def one_or_more(pattern, lazy=False, capturing=False, name=None):
+
+    starter, ender = get_group_boundaries(
+        "+", lazy=lazy, capturing=capturing, name=name
+    )
+
+    return instancer(pattern, starter=starter, ender=ender)
+
+
+def group(pattern, capturing=False, lazy=False, name=None):
+    starter, ender = get_group_boundaries("", lazy=lazy, capturing=capturing, name=name)
+    return instancer(pattern, starter=starter, ender=ender)
+
+
+def orex_or(*patterns):
+    joined_patterns = "|".join([extract_regex(pat) for pat in patterns])
+    return Ox("(" + joined_patterns + ")")
+
+
+def n_or_more(pattern, min=None, max=None):
+    # pylint: disable=(redefined-builtin)
+    quantifier = r"){"
+
+    if min:
+        quantifier += str(min)
+
+    quantifier += ","
+
+    if max:
+        quantifier += str(max)
+
+    quantifier += "}"
+
+    return instancer(pattern, starter="(", ender=quantifier)
+
+
+def optional(pattern, lazy=False, capturing=False, name=None):
+
+    starter, ender = get_group_boundaries(
+        "?", lazy=lazy, capturing=capturing, name=name
+    )
+    return instancer(pattern, starter=starter, ender=ender)
+
+
+def zero_or_more(pattern, lazy=False, capturing=False, name=None):
+    starter, ender = get_group_boundaries(
+        "*", lazy=lazy, capturing=capturing, name=name
+    )
+    return instancer(pattern, starter=starter, ender=ender)
+
+
+def not_in(pattern):
+    return instancer(pattern, starter="[^", ender="]")
+
+
+def orex_and(*patterns):
+    pattern = logic_builder(")(?=.*", *patterns)
+    return instancer(pattern, starter="(?=.*", ender=")")
+
+
+def reference_capturing_group(n=1, name=None):
+    if name:
+        return Ox(f"(?P={name})")
+    return Ox(rf"\{n}")
+
+
+def character_class(pattern):
+    return instancer(pattern, starter="[", ender="]")
+
+
+def positive_lookahead_assertion(pattern):
+    return instancer(pattern, starter="(?=", ender=")")
+
+
+def negative_lookahead_assertion(pattern):
+    return instancer(pattern, starter="(?!", ender=")")
 
 
 for key, value in constants.items():
     if key != "QUOTATION":
         exec(f'{key} = Ox(expr="{value}")')  # pylint: disable=(exec-used)
+        # exec(f'Ox.{key} = Ox(expr="{value}")')  # pylint: disable=(exec-used)
+
 
 QUOTATION = Ox(expr='"')
+# Needed to be coded by hand, as otherwise it gets problematic
+BOUNDARY = Ox(expr=r"\b")
+WORD = Ox(expr=r"\b(\w+)\b")
+BACKSLASH = Ox(r"\\")
+END = Ox(r"$")
