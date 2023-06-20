@@ -1,14 +1,22 @@
 import re
-from constants import RegexConstants
+from constants import RegexConstants, constants
 
 
 class Ox(RegexConstants):
-    def __init__(self):
+    def __init__(self, expr=None):
         super().__init__()
-        self.expr = r""
+        if not expr:
+            self.expr = r""
+        else:
+            self.expr = expr
 
     def __repr__(self):
         return f"Ox('{self.expr}')"
+
+    def __add__(self, other):
+        if isinstance(other, str):
+            return Ox(expr=self.expr + other)
+        return Ox(expr=self.expr + other.expr)
 
     def _instancer(self, pattern, starter="", ender=""):
         if isinstance(pattern, str):
@@ -232,3 +240,28 @@ class Ox(RegexConstants):
         else:
             self.expr += "(?!" + pattern.expr + ")"
         return self
+
+
+def literal(expr_str):
+    return Ox(expr=expr_str)
+
+
+def instancer(pattern, starter="", ender=""):
+    if isinstance(pattern, str):
+        expr = starter + pattern + ender
+        return Ox(expr=expr)
+
+    expr = starter + pattern.expr + ender
+    return Ox(expr=expr)
+
+
+def repeat(regex, n):
+    ender = "){" + str(n) + "}"
+    return instancer(regex, starter="(", ender=ender)
+
+
+for key, value in constants.items():
+    if key != "QUOTATION":
+        exec(f'{key} = Ox(expr="{value}")')  # pylint: disable=(exec-used)
+
+QUOTATION = Ox(expr='"')

@@ -2,20 +2,21 @@
 # flake8: noqa
 
 import re
-from regex import Ox
 import pytest
+import orex as ox
+from orex import Ox
 
 
 def test_constants_can_be_found():
 
     s = "foo123bar"
 
-    pattern = Ox().DIGIT.DIGIT.DIGIT.compile()
+    pattern = ox.DIGIT + ox.DIGIT + ox.DIGIT
 
-    result = re.search(pattern, s)
+    result = re.search(pattern.compile(), s)
     assert result is not None
 
-    results = re.findall(pattern, s)
+    results = re.findall(pattern.compile(), s)
     assert len(results) == 1
     assert results[0] == "123"
 
@@ -24,37 +25,31 @@ def test_starts_with():
 
     s = "foo123bar"
 
-    pattern = Ox().starts_with("f").compile()
-    result = re.search(pattern, s)
-    assert result is not None
+    pattern = ox.START + "f"
+    assert pattern.is_match(s)
 
-    pattern2 = Ox().starts_with("b").compile()
-    result = re.search(pattern2, s)
-    assert result is None
+    pattern2 = ox.START + "b"
+    assert not pattern2.is_match(s)
 
 
 def test_ends_with():
 
     s = "foo123bar"
 
-    pattern = Ox().ends_with("r").compile()
-    result = re.search(pattern, s)
-    assert result is not None
+    pattern = ox.literal("r") + ox.END
+    assert pattern.is_match(s)
 
-    pattern2 = Ox().starts_with("o").compile()
-    result = re.search(pattern2, s)
-    assert result is None
-
-
-def test_is_match():
-    s = "foo123bar"
-    assert Ox().ends_with("r").is_match(s)
-    assert not Ox().ends_with("o").is_match(s)
+    pattern = Ox() + "r" + ox.END
+    assert pattern.is_match(s)
+    pattern = Ox() + "s" + ox.END
+    assert not pattern.is_match(s)
 
 
 def test_findall():
     s = "foo123bar345"
-    results = Ox().DIGIT.DIGIT.DIGIT.findall(s)
+    pattern = ox.DIGIT + ox.DIGIT + ox.DIGIT
+    results = pattern.findall(s)
+
     assert len(results) == 2
     assert results[0] == "123"
     assert results[1] == "345"
@@ -230,7 +225,7 @@ def test_not_pattern():
     pattern = (
         Ox()
         .literal('"')
-        .zero_or_more(Ox().contains_not(Ox().RETURN.QUOTAtION.NEWLINE), capturing=False)
+        .zero_or_more(Ox().contains_not(Ox().RETURN.QUOTATION.NEWLINE), capturing=False)
         .literal('"')
     )
     results = pattern.findall(s)
@@ -516,3 +511,18 @@ def test_negative_lookahead_assertion():
 
     s = "something.exe"
     assert pattern.is_match(s)
+
+
+def test_adding_regexes():
+    pattern1 = Ox().START
+    pattern2 = Ox().literal("Happy")
+
+    pattern3 = pattern1 + pattern2
+    pattern3.expr == "^Happy"
+
+    s = "Happy Birthday"
+    assert pattern3.is_match(s)
+
+
+def test_constants():
+    pass
