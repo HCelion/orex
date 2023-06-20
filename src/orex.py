@@ -169,7 +169,7 @@ class Ox(RegexConstants):
         return self
 
     @classmethod
-    def extract_regex(cls, pattern):
+    def extract_regex(self, pattern):
 
         if isinstance(pattern, str):
             return pattern
