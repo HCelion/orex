@@ -168,6 +168,14 @@ class Ox(RegexConstants):
         self._instancer(pattern, starter=starter, ender=ender)
         return self
 
+    @classmethod
+    def extract_regex(cls, pattern):
+
+        if isinstance(pattern, str):
+            return pattern
+
+        return pattern.expr
+
     def _logic_builder(self, logic, *patterns):
         pattern = [
             (pattern if isinstance(pattern, str) else pattern.expr)
