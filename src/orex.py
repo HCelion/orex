@@ -18,13 +18,17 @@ class Ox(RegexConstants):
             return Ox(expr=self.expr + other)
         return Ox(expr=self.expr + other.expr)
 
-    def _instancer(self, pattern, starter="", ender=""):
+    @classmethod
+    def extract_regex(self, pattern):
+
         if isinstance(pattern, str):
-            self.expr += starter + pattern + ender
+            return pattern
 
-        else:
-            self.expr += starter + pattern.expr + ender
+        return pattern.expr
 
+    def _instancer(self, pattern, starter="", ender=""):
+        pattern = self.extract_regex(pattern)
+        self.expr += starter + pattern + ender
         return self
 
     def compile(
@@ -167,14 +171,6 @@ class Ox(RegexConstants):
         )
         self._instancer(pattern, starter=starter, ender=ender)
         return self
-
-    @classmethod
-    def extract_regex(self, pattern):
-
-        if isinstance(pattern, str):
-            return pattern
-
-        return pattern.expr
 
     def _logic_builder(self, logic, *patterns):
         pattern = [
