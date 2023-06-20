@@ -13,11 +13,6 @@ class Ox(RegexConstants):
     def __repr__(self):
         return f"Ox('{self.expr}')"
 
-    def __add__(self, other):
-        if isinstance(other, str):
-            return Ox(expr=self.expr + other)
-        return Ox(expr=self.expr + other.expr)
-
     @classmethod
     def extract_regex(self, pattern):
 
@@ -25,6 +20,10 @@ class Ox(RegexConstants):
             return pattern
 
         return pattern.expr
+
+    def __add__(self, other):
+        other = self.extract_regex(other)
+        return Ox(expr=self.expr + other)
 
     def _instancer(self, pattern, starter="", ender=""):
         pattern = self.extract_regex(pattern)
