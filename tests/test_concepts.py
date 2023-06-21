@@ -240,7 +240,7 @@ def test_not_pattern():
     pattern = (
         ox.literal('"')
         + ox.zero_or_more(
-            ox.not_in(ox.RETURN + ox.QUOTATION + ox.NEWLINE), capturing=False
+            ox.NOT(ox.RETURN + ox.QUOTATION + ox.NEWLINE), capturing=False
         )
         + ox.literal('"')
     )
@@ -288,7 +288,7 @@ def test_back_reference():
 
     pattern = (
         ox.literal("<")
-        + ox.group(ox.one_or_more(ox.not_in(">")), capturing=True)
+        + ox.group(ox.one_or_more(ox.NOT(">")), capturing=True)
         + ox.literal(">")
         + ox.group(ox.one_or_more(ox.ANY_CHAR), capturing=True)
         + ox.literal("</")
@@ -301,7 +301,7 @@ def test_back_reference():
 
     pattern = (
         ox.literal("<")
-        + ox.group(ox.one_or_more(ox.not_in(">")), capturing=True)
+        + ox.group(ox.one_or_more(ox.NOT(">")), capturing=True)
         + ox.literal(">")
         + ox.group(ox.one_or_more(ox.ANY_CHAR), capturing=True)
         + ox.literal("</")
@@ -315,7 +315,7 @@ def test_back_reference():
 
     pattern = (
         ox.literal("<")
-        + ox.group(ox.one_or_more(ox.not_in(">")), capturing=True)
+        + ox.group(ox.one_or_more(ox.NOT(">")), capturing=True)
         + ox.literal(">")
         + ox.group(ox.one_or_more(ox.ANY_CHAR), capturing=True)
         + ox.literal("</")
@@ -327,7 +327,7 @@ def test_back_reference():
     s = "<EM>first</first>"
     pattern = (
         ox.literal("<")
-        + ox.group(ox.one_or_more(ox.not_in(">")), capturing=True)
+        + ox.group(ox.one_or_more(ox.NOT(">")), capturing=True)
         + ox.literal(">")
         + ox.group(ox.one_or_more(ox.ANY_CHAR), capturing=True)
         + ox.literal("</")
@@ -342,7 +342,7 @@ def test_named_back_reference():
 
     pattern = (
         ox.literal("<")
-        + ox.group(ox.one_or_more(ox.not_in(">")), capturing=True, name="tag")
+        + ox.group(ox.one_or_more(ox.NOT(">")), capturing=True, name="tag")
         + ox.literal(">")
         + ox.group(ox.one_or_more(ox.ANY_CHAR), capturing=True)
         + ox.literal("</")
@@ -441,6 +441,14 @@ def test_replacement():
     assert s == "12 drummers drumming, 11 pipers piping, 10 lords a-leaping"
 
 
+def test_advanced_subbing():
+    s = "section{First} section{second}"
+    pattern = ox.literal("section{") + ox.capture(ox.zero_or_more(ox.NOT("}"))) + "}"
+    replacement = ox.literal("subsection{") + ox.reference_capturing_group() + "}"
+    substitution = pattern.sub(s, replacement=replacement)
+    assert substitution == "subsection{First} subsection{second}"
+
+
 def test_compilation():
     import re
 
@@ -460,7 +468,7 @@ def test_named_groups():
 
     pattern = (
         ox.literal("<")
-        + ox.group(ox.one_or_more(ox.not_in(">")), capturing=True, name="tag")
+        + ox.group(ox.one_or_more(ox.NOT(">")), capturing=True, name="tag")
         + ox.literal(">")
         + ox.group(ox.one_or_more(ox.ANY_CHAR), capturing=True)
         + ox.literal("</")
@@ -481,7 +489,7 @@ def test_groupdict():
 
     pattern = (
         ox.literal("<")
-        + ox.group(ox.one_or_more(ox.not_in(">")), capturing=True, name="tag")
+        + ox.group(ox.one_or_more(ox.NOT(">")), capturing=True, name="tag")
         + ox.literal(">")
         + ox.group(ox.one_or_more(ox.ANY_CHAR), capturing=True, name="content")
         + ox.literal("</")
@@ -503,7 +511,7 @@ def test_positive_lookahead_assertion():
         ox.zero_or_more(ox.ANY_CHAR)
         + ox.DOT
         + ox.positive_lookahead_assertion(ox.literal("bat") + ox.END)
-        + ox.zero_or_more(ox.not_in(ox.DOT))
+        + ox.zero_or_more(ox.NOT(ox.DOT))
         + ox.END
     )
     assert pattern.is_match(s)
@@ -518,7 +526,7 @@ def test_negative_lookahead_assertion():
         ox.zero_or_more(ox.ANY_CHAR)
         + ox.DOT
         + ox.negative_lookahead_assertion(ox.literal("bat") + ox.END)
-        + ox.zero_or_more(ox.not_in(ox.DOT))
+        + ox.zero_or_more(ox.NOT(ox.DOT))
         + ox.END
     )
     assert not pattern.is_match(s)
@@ -536,3 +544,44 @@ def test_adding_regexes():
 
     s = "Happy Birthday"
     assert pattern3.is_match(s)
+
+
+def test_splitting():
+    pattern = ox.one_or_more(ox.NON_WORD)
+    s = "This is a test, short and sweet, of split()."
+    result = pattern.split(s)
+    assert result == [
+        "This",
+        "is",
+        "a",
+        "test",
+        "short",
+        "and",
+        "sweet",
+        "of",
+        "split",
+        "",
+    ]
+
+    result = pattern.split(s, 3)
+    assert result == ["This", "is", "a", "test, short and sweet, of split()."]
+
+
+def test_capture():
+    s = "<EM>first</EM>"
+
+    pattern = (
+        ox.literal("<")
+        + ox.capture(ox.one_or_more(ox.NOT(">")), name="tag")
+        + ox.literal(">")
+        + ox.capture(ox.one_or_more(ox.ANY_CHAR))
+        + ox.literal("</")
+        + ox.reference_capturing_group()
+        + ox.literal(">")
+    )
+
+    results = pattern.findall(s)
+    assert len(results) == 1
+    assert results[0] == ("EM", "first")
+
+    assert pattern.group_dict(s) == {"tag": "EM"}

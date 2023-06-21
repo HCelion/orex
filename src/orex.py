@@ -64,7 +64,15 @@ class Ox:
         return None
 
     def sub(self, string, replacement):
-        return re.sub(pattern=self.expr, repl=replacement, string=string)
+        if isinstance(replacement, str):
+            return re.sub(pattern=self.expr, repl=replacement, string=string)
+        # Regexes are a fair replacement as well
+        return re.sub(pattern=self.expr, repl=replacement.expr, string=string)
+
+    def split(self, s, max_split=None):
+        if max_split:
+            return re.compile(self.expr).split(s, max_split)
+        return re.compile(self.expr).split(s)
 
 
 def literal(expr_str):
@@ -170,7 +178,12 @@ def zero_or_more(pattern, lazy=False, capturing=False, name=None):
     return instancer(pattern, starter=starter, ender=ender)
 
 
-def not_in(pattern):
+def capture(pattern, lazy=False, name=None):
+    starter, ender = get_group_boundaries("", lazy=lazy, capturing=True, name=name)
+    return instancer(pattern, starter=starter, ender=ender)
+
+
+def NOT(pattern):
     return instancer(pattern, starter="[^", ender="]")
 
 
