@@ -4,7 +4,6 @@
 import re
 import pytest
 import orex as ox
-from orex import Ox
 
 
 def test_constants_can_be_found():
