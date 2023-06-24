@@ -26,4 +26,5 @@ constants = {
     "BAR": r"\|",
     "START": r"^",
     "END": r"$",
+    "DASH": r"\-",
 }
