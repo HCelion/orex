@@ -291,7 +291,7 @@ def test_back_reference():
         + ox.literal(">")
         + ox.group(ox.one_or_more(ox.ANY_CHAR), capturing=True)
         + ox.literal("</")
-        + ox.reference_capturing_group()
+        + ox.backreference()
         + ox.literal(">")
     )
     results = pattern.findall(s)
@@ -304,7 +304,7 @@ def test_back_reference():
         + ox.literal(">")
         + ox.group(ox.one_or_more(ox.ANY_CHAR), capturing=True)
         + ox.literal("</")
-        + ox.reference_capturing_group(1)  # Here we explicitly reference 1st group
+        + ox.backreference(1)  # Here we explicitly reference 1st group
         + ox.literal(">")
     )
 
@@ -318,7 +318,7 @@ def test_back_reference():
         + ox.literal(">")
         + ox.group(ox.one_or_more(ox.ANY_CHAR), capturing=True)
         + ox.literal("</")
-        + ox.reference_capturing_group(2)  # Here we explicitly reference 1st group
+        + ox.backreference(2)  # Here we explicitly reference 1st group
         + ox.literal(">")
     )
     assert not pattern.is_match(s)
@@ -330,7 +330,7 @@ def test_back_reference():
         + ox.literal(">")
         + ox.group(ox.one_or_more(ox.ANY_CHAR), capturing=True)
         + ox.literal("</")
-        + ox.reference_capturing_group(2)  # Here we explicitly reference 2nd  group
+        + ox.backreference(2)  # Here we explicitly reference 2nd  group
         + ox.literal(">")
     )
     assert pattern.is_match(s)
@@ -345,9 +345,7 @@ def test_named_back_reference():
         + ox.literal(">")
         + ox.group(ox.one_or_more(ox.ANY_CHAR), capturing=True)
         + ox.literal("</")
-        + ox.reference_capturing_group(
-            name="tag"
-        )  # Here we explicitly reference 2nd  group
+        + ox.backreference(name="tag")  # Here we explicitly reference 2nd  group
         + ox.literal(">")
     )
     results = pattern.findall(s)
@@ -358,23 +356,19 @@ def test_named_back_reference():
 def test_optional_special_case():
     s = "b"
     # (q?)b\1 does typically not match as the empty group does not back reference
-    pattern = (
-        ox.optional("q", capturing=True)
-        + ox.literal("b")
-        + ox.reference_capturing_group()
-    )
+    pattern = ox.optional("q", capturing=True) + ox.literal("b") + ox.backreference()
     assert not pattern.is_match(s)
     # (q)?b\1 does typically match
     pattern = (
         ox.group(ox.literal("q?"), capturing=True)
         + ox.literal("b")
-        + ox.reference_capturing_group()
+        + ox.backreference()
     )
     assert pattern.is_match(s)
     pattern = (
         ox.group(ox.optional("q", capturing=False), capturing=True)
         + ox.literal("b")
-        + ox.reference_capturing_group()
+        + ox.backreference()
     )
     assert pattern.is_match(s)
 
@@ -383,7 +377,7 @@ def test_forward_referencing_does_not_work_in_python():
     s = "oneonetwo"
     pattern = ox.one_or_more(
         ox.orex_or(
-            ox.reference_capturing_group(2) + ox.literal("two"),
+            ox.backreference(2) + ox.literal("two"),
             ox.group(ox.literal("one"), capturing=True),
         ),
         capturing=True,
@@ -443,7 +437,7 @@ def test_replacement():
 def test_advanced_subbing():
     s = "section{First} section{second}"
     pattern = ox.literal("section{") + ox.capture(ox.zero_or_more(ox.NOT("}"))) + "}"
-    replacement = ox.literal("subsection{") + ox.reference_capturing_group() + "}"
+    replacement = ox.literal("subsection{") + ox.backreference() + "}"
     substitution = pattern.sub(s, replacement=replacement)
     assert substitution == "subsection{First} subsection{second}"
 
@@ -471,9 +465,7 @@ def test_named_groups():
         + ox.literal(">")
         + ox.group(ox.one_or_more(ox.ANY_CHAR), capturing=True)
         + ox.literal("</")
-        + ox.reference_capturing_group(
-            name="tag"
-        )  # Here we explicitly reference 2nd  group
+        + ox.backreference(name="tag")  # Here we explicitly reference 2nd  group
         + ox.literal(">")
     )
 
@@ -492,9 +484,7 @@ def test_groupdict():
         + ox.literal(">")
         + ox.group(ox.one_or_more(ox.ANY_CHAR), capturing=True, name="content")
         + ox.literal("</")
-        + ox.reference_capturing_group(
-            name="tag"
-        )  # Here we explicitly reference 2nd  group
+        + ox.backreference(name="tag")  # Here we explicitly reference 2nd  group
         + ox.literal(">")
     )
 
@@ -575,7 +565,7 @@ def test_capture():
         + ox.literal(">")
         + ox.capture(ox.one_or_more(ox.ANY_CHAR))
         + ox.literal("</")
-        + ox.reference_capturing_group()
+        + ox.backreference()
         + ox.literal(">")
     )
 

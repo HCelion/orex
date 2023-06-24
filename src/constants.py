@@ -4,7 +4,7 @@ constants = {
     "DIGIT": r"\d",
     "NON_DIGIT": r"\D",
     "BOUNDARY": r"\b",
-    "SPACE": r"[ \t\r\n\v\f]",
+    "SPACE": r"\s",
     "TAB": r"\t",
     "NEWLINE": r"\n",
     "NON_WORD": r"\W",

@@ -192,7 +192,7 @@ def orex_and(*patterns):
     return instancer(pattern, starter="(?=.*", ender=")")
 
 
-def reference_capturing_group(n=1, name=None):
+def backreference(n=1, name=None):
     if name:
         return Ox(f"(?P={name})")
     return Ox(rf"\{n}")

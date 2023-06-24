@@ -29,7 +29,7 @@ pattern = ox.literal('Hello')
 pattern.is_match(s)
 ```
 ```python
-[] True
+True
 ```
 
 Orex regular expressions are extended by simply using a `+`.
@@ -142,4 +142,19 @@ email_pattern.group_dict(email)
 ```
 ```
 {'user': 'captainspamalot', 'domain': 'funnyspammail', 'ext': 'com'}
+```
+
+Capturing has another benefit, namely that we can use it to find repeated patterns
+```python
+tag_name = ox.one_or_more(allowed_characters)
+content = ox.one_or_more(ox.ANY_CHAR)
+tag_pattern = ox.literal('<') + ox.capture(tag_name, 'tag') + '>' \
+          + ox.capture(content,'content') + '</' +ox.backreference(name='tag')+'>'
+
+message = '<name>Sir Snakington</name>'
+tag_pattern.group_dict(message)
+```
+
+```
+{'tag': 'name', 'content': 'Sir Snakington'}
 ```
