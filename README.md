@@ -36,16 +36,17 @@ Orex regular expressions are extended by simply using a `+`.
 A slightly more useful example is to find a hex colour
 
 ```python
-pattern = ox.literal('#') + ox.HEXDIGIT + ox.HEXDIGIT + ox.HEXDIGIT + ox.HEXDIGIT + ox.HEXDIGIT + ox.HEXDIGIT
+pattern = ox.literal('#') + ox.HEXDIGIT + ox.HEXDIGIT +\
+ ox.HEXDIGIT + ox.HEXDIGIT + ox.HEXDIGIT + ox.HEXDIGIT
 
-s = 'This package is #a83232 hot'
-pattern.is_match(s)
+s_hex = 'This package is #a83232 hot'
+pattern.is_match(s_hex)
 ```
 ```python
 [] True
 ```
 ```python
-pattern.findall(s)
+pattern.findall(s_hex)
 ```
 
 ```python
@@ -54,15 +55,15 @@ pattern.findall(s)
 
 On the other hand
 ```python
-s = 'Just a twitter handle: #Red123'
-pattern.is_match(s)
+s_nonhex = 'Just a twitter handle: #Red123'
+pattern.is_match(s_nonhex)
 ```
 
 ```python
 [] False
 ```
 ```python
-pattern.findall(s)
+pattern.findall(s_nonhex)
 ```
 
 ```python
