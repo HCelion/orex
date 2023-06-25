@@ -158,3 +158,15 @@ tag_pattern.group_dict(message)
 ```
 {'tag': 'name', 'content': 'Sir Snakington'}
 ```
+
+Back references can also be used to substitute patterns, though here the named backreference does not work. Instead, the backrefence uses the index of the reference in the pattern.
+
+```python
+tag_pattern = ox.literal('<') + ox.capture(tag_name) + '>' + ox.capture(content) + '</' +ox.backreference(1)+'>'
+replace_pattern = ox.literal('<') + ox.backreference(2) + '>' + ox.backreference(1) + ox.literal('<') + ox.backreference(2) + '>'
+tag_pattern.sub(message, replace_pattern)
+```
+
+```python
+'<Sir Snakington>name<Sir Snakington>'
+```

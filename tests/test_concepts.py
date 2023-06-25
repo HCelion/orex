@@ -265,6 +265,7 @@ def test_capturing_in_optional():
 def test_orex_and():
     s = "foo123bar"
     assert ox.orex_and("foo", "bar").is_match(s)
+    assert ox.orex_and("bar", "foo").is_match(s)
     assert ox.orex_and("foo", ox.literal("bar"))
     assert ox.orex_and("foo", "bar", "123").is_match(s)
     assert ox.orex_and("123", "bar", "foo").is_match(s)
