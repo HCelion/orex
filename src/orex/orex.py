@@ -1,5 +1,5 @@
 import re
-from constants import constants
+from orex.constants import constants
 
 
 class Ox:
