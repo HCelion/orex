@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "orex"
-description = "Orex: Ordinary human-friendly Regular EXpressions"
+description = "Orex: Ordinary human-friendly Regular Expressions"
 readme = "README.md"
 authors = [{ name = "Arvid J. Kingl", email = "akingl2016@gmail.com" }, {name='Fernando Egoavil Cisneros'}]
 dependencies = [
