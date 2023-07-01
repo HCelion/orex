@@ -124,7 +124,7 @@ def get_group_boundaries(group_identifier, lazy, capturing, name=None):
 
 def repeat(regex, n):
     ender = "){" + str(n) + "," + str(n) + "}"
-    return instancer(regex, starter="(", ender=ender)
+    return instancer(regex, starter="(?:", ender=ender)
 
 
 def one_or_more(pattern, lazy=False, capturing=False, name=None):
@@ -160,7 +160,7 @@ def n_or_more(pattern, min=None, max=None):
 
     quantifier += "}"
 
-    return instancer(pattern, starter="(", ender=quantifier)
+    return instancer(pattern, starter="(?:", ender=quantifier)
 
 
 def optional(pattern, lazy=False, capturing=False, name=None):
@@ -178,7 +178,7 @@ def zero_or_more(pattern, lazy=False, capturing=False, name=None):
     return instancer(pattern, starter=starter, ender=ender)
 
 
-def capture(pattern, lazy=False, name=None):
+def capture(pattern, name=None, lazy=False):
     starter, ender = get_group_boundaries("", lazy=lazy, capturing=True, name=name)
     return instancer(pattern, starter=starter, ender=ender)
 
@@ -192,7 +192,7 @@ def orex_and(*patterns):
     return instancer(pattern, starter="(?=.*", ender=")")
 
 
-def reference_capturing_group(n=1, name=None):
+def backreference(n=1, name=None):
     if name:
         return Ox(f"(?P={name})")
     return Ox(rf"\{n}")
