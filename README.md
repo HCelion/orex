@@ -1,6 +1,6 @@
-# Orex
+# ASK-Orex
 
-Orex is a package designed to simplify regular expressions in Python. It provides a high-level interface for constructing and working with regular expressions, making it easier and more intuitive to use.
+ASK-Orex is a package designed to simplify regular expressions in Python. It provides a high-level interface for constructing and working with regular expressions, making it easier and more intuitive to use.
 
 The package is heavily inspired by Richy Cotton's `rebus` package for the `R` language.
 
@@ -9,13 +9,13 @@ The package is heavily inspired by Richy Cotton's `rebus` package for the `R` la
 You can install Orex using pip:
 
 ```shell
-pip install orex
+pip install ask-orex
 ```
 
-To use Orex, import the `orex` package into your Python script:
+To use Orex, import the `ask-orex` package into your Python script:
 
 ```python
-import orex as ox
+import ask_orex as ox
 ```
 
 

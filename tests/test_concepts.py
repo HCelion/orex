@@ -3,7 +3,7 @@
 
 import re
 import pytest
-import orex as ox
+import ask_orex as ox
 
 
 def test_constants_can_be_found():

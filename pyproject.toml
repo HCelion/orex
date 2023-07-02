@@ -10,7 +10,7 @@ authors = [{ name = "Arvid J. Kingl", email = "akingl2016@gmail.com" }, {name='F
 dependencies = [
     "pytest",
 ]
-version = "1.0.0"
+version = "1.1.0"
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
@@ -27,7 +27,7 @@ Homepage = "https://github.com/HCelion/orex"
 where = ["src"]
 
 [tool.bumpver]
-current_version = "1.0.0"
+current_version = "1.1.0"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message = "bump version {old_version} -> {new_version}"
 commit = true
