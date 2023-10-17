@@ -207,17 +207,3 @@ def positive_lookahead_assertion(pattern):
 
 def negative_lookahead_assertion(pattern):
     return instancer(pattern, starter="(?!", ender=")")
-
-
-# for key, value in constants.items():
-#     if key != "QUOTATION":
-#         exec(f'{key} = Ox(expr="{value}")')  # pylint: disable=(exec-used)
-#         # exec(f'Ox.{key} = Ox(expr="{value}")')  # pylint: disable=(exec-used)
-#
-#
-# QUOTATION = Ox(expr='"')
-# # Needed to be coded by hand, as otherwise it gets problematic
-# BOUNDARY = Ox(expr=r"\b")
-# WORD = Ox(expr=r"\b(\w+)\b")
-# BACKSLASH = Ox(r"\\")
-# END = Ox(r"$")
