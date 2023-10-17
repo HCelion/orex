@@ -1,12 +1,11 @@
 import re
-from ask_orex.constants import constants
 
 
 class Ox:
     def __init__(self, expr=None):
         super().__init__()
         if not expr:
-            self.expr = r""
+            self.expr = ""
         else:
             self.expr = expr
 
@@ -148,7 +147,7 @@ def orex_or(*patterns):
 
 def n_or_more(pattern, min=None, max=None):
     # pylint: disable=(redefined-builtin)
-    quantifier = r"){"
+    quantifier = "){"
 
     if min:
         quantifier += str(min)
@@ -208,17 +207,3 @@ def positive_lookahead_assertion(pattern):
 
 def negative_lookahead_assertion(pattern):
     return instancer(pattern, starter="(?!", ender=")")
-
-
-for key, value in constants.items():
-    if key != "QUOTATION":
-        exec(f'{key} = Ox(expr="{value}")')  # pylint: disable=(exec-used)
-        # exec(f'Ox.{key} = Ox(expr="{value}")')  # pylint: disable=(exec-used)
-
-
-QUOTATION = Ox(expr='"')
-# Needed to be coded by hand, as otherwise it gets problematic
-BOUNDARY = Ox(expr=r"\b")
-WORD = Ox(expr=r"\b(\w+)\b")
-BACKSLASH = Ox(r"\\")
-END = Ox(r"$")
